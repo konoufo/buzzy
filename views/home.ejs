@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" style="overflow:hidden;width:100%; height:100%;">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Genie</title>
+    <style type="text/css">
+        .extra-note {
+            font-size: 0.2em;
+        }
+    </style>
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+    <script type="text/javascript" src="js/jquery-1.12.4.js"></script>
+</head>
+<body style="font-size:16px; height: 100%; overflow:hidden;width:100%;">
+    <div id="selectTeam" style="margin: 4em auto; min-width:100%; text-align:center;">
+        <select style="font-size: 1.8em; text-align:left; width:80%;">
+                <option value="fool">Choisis ton équipe</option>
+            <% for (var i=0; i < teams.length; i++) { %>
+                <option value="<%= teams[i] %>"><%= teams[i] %></option>
+            <% } %>
+        </select>
+    </div>
+    <div id="buzzerButton" style="display:none;height:90%;width:100%;position:fixed;bottom:10%;cursor:pointer;" onclick="void(o)">
+        <div id="button" style="background-color:#d32f2f;border-radius:50%; margin:auto; max-width:100%;padding: 0px;width:250px; height:250px;position:relative; top:-10px;">
+            
+        </div>
+        <h4 style="font-size: 2em; text-align:center">Buzz !</h4>
+    </div>
+    <div id="winnerCheck" style="font-size: 8em; margin-top: 1em; min-width:100%; text-align: center; display:none;">
+        <div id="win" style="display:none;">
+            <p style="color:#4caf50"><i class="fa fa-check-circle-o"></i></p>
+            <p class="extra-note">Premier !</p>
+        </div>
+        <div id="lose" style="display:none;">
+            <p style="color:#ef6c00">&times;</p>
+            <p class="extra-note"></p>
+        </div>
+    </div>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            
+            $('#selectTeam select').change(function(){
+                var selected = $(this).val();
+                if ( selected !== 'fool' ){
+                    window.MYTEAM = selected;
+                    $('#selectTeam').slideUp();
+                    $('#buzzerButton').slideDown({complete: function(){
+                        var windowHeight = $(window).height();
+                        $('#button').css('margin-top', (windowHeight/2 - 125)  + 'px');
+                    }});
+                }
+                console.log(selected);
+            });
+            $(document).on('click', '#buzzerButton', function(){
+                $('#button').css('background-color', '#ef5350');
+                setTimeout(function(){
+                    $('#button').css('background-color', '#d32f2f');
+                }.bind(this), 600);
+                MYTEAM && $.ajax({
+                    url: '/',
+                    method: 'post',
+                    data: {'name': MYTEAM},
+
+                }).done(function(data, status, xhr){
+                    $('#buzzerButton').hide();
+                    if (data == MYTEAM) {
+                        $('#win').show();
+                        $('#winnerCheck').slideDown(1);
+                    } else {
+                        $('#lose').show().children('.extra-note').text(data);
+                        $('#winnerCheck').slideDown(1);
+                    }
+                    setTimeout(function(){
+                        $('#winnerCheck').fadeOut();
+                        $('#buzzerButton').slideDown();
+                        $('#winnerCheck').children('div').hide();
+                    }, 2000);
+                });
+                
+                console.log(MYTEAM);
+            });
+        })
+    </script>
+</body>
+</html>
